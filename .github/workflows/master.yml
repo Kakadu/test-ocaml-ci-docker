@@ -1,0 +1,72 @@
+name: Build
+
+on:
+  push:
+    branches:
+      - 'master'
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-20.04
+        ocaml-compiler:
+          - 4.14.x
+
+    runs-on: ${{ matrix.os }}
+
+    #container: node:17.6.0
+    container:
+      image: kakadu18/ocaml:fp2020
+      options: --user root
+
+    steps:
+      - run: ls /__w/test-ocaml-ci-docker/test-ocaml-ci-docker -la
+
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          path: /__w/test-ocaml-ci-docker/test-ocaml-ci-docker
+
+      - run: ls -la
+      #- run: ls /__w/test-ocaml-ci-docker/test-ocaml-ci-docker -la
+
+      - run: which ocamlopt
+      - run: which opam
+      - run: which dune
+      - run: opam list
+      - run: dune build --profile=release
+
+      #- run: opam pin OCanren-ppx --dev-repo -n
+      #- run: opam pin OCanren --dev-repo -n
+
+      #- run: opam depext OCanren --yes
+      #- run: opam install OCanren-ppx OCanren --yes
+
+      #- run: opam pin add . --no-action
+
+      #- name: Installing depexts
+      #  run: opam depext noCanren --yes --with-test
+
+      #- name: Installing dependencies
+      #  run: opam install . --deps-only --with-test
+
+      #- name: Building
+      #  run: opam exec -- dune build --profile=release -p noCanren
+
+      #- name: Installing dependencies for testing
+      #  run: opam exec -- dune external-lib-deps -p noCanren-tests . --missing  | cut -f1 | xargs opam install --yes GT
+
+      #- name: Testing
+      #  run: opam exec -- dune runtest --profile=release -p noCanren #,noCanren-tests
+
+      #- name: Installing a package
+      #  run: |
+      #    opam exec -- dune build @install --profile=release
+      #    opam exec -- dune install --profile=release noCanren
+
+      #- name: Listing files
+      #  run: |
+      #    opam show noCanren --list-files
