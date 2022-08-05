@@ -77,6 +77,33 @@ jobs:
           opam install odoc --yes
           cd ${{ env.latest }} && opam exec -- dune build @doc --profile=release
 
+      - uses: actions/checkout@v2
+        with:
+          repository: Kakadu/mylinter
+          path: mylinter
+      - run: opam pin add ./mylinter --no-action
+      - name: Installing linter
+        run: opam install mylinter --yes --with-doc
+
+      - uses: reviewdog/action-setup@v1
+
+      - run: echo "RDJSON_DIR_PATH=_build/default/_found_lints" >> $GITHUB_ENV
+      - run: cd ${{ env.latest }} && mkdir -p ${{ env.RDJSON_DIR_PATH }}
+      - run: echo "RDJSON_FILE_PATH=${{ env.RDJSON_DIR_PATH }}/lints.rdjsonl" >> $GITHUB_ENV
+
+      - name: Running linter in ${{ env.latest }}...
+        run: cd ${{ env.latest }} && opam exec -- mylinter -dir . -add-prefix ${{ env.latest }}/ -ordjsonl ${{ env.RDJSON_FILE_PATH }}
+
+
+      - name: Run reviewdog
+        if: ${{ false }}
+        #env:
+        #  REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.REVIEWDOG_TOKEN1 }}
+        run: >
+          cat ${{ env.latest }}/${{ env.RDJSON_FILE_PATH }} |
+          reviewdog -f=rdjsonl -filter-mode nofilter -reporter=github-pr-check
+
+
       #- run: opam pin OCanren-ppx --dev-repo -n
       #- run: opam pin OCanren --dev-repo -n
 
