@@ -1,11 +1,15 @@
 name: Build
 
 on:
+  pull_request:
+    branches:
+      - 'master'
   push:
     branches:
       - 'master'
 env:
   OPAMROOT: /home/user/.opam
+  OPAMYES: true
 jobs:
   build:
     defaults:
@@ -21,27 +25,17 @@ jobs:
 
     runs-on: ${{ matrix.os }}
 
-    #container: node:17.6.0
     container:
       image: kakadu18/ocaml:fp2022
       #options: --user user
       #options: -v /__w/test-ocaml-ci-docker/test-ocaml-ci-docker:/home/user/:rw -w /home/user/
 
     steps:
-      #- run: pwd
-      #- run: id
-      #- run: ls -la
-      #- run: ls /__w/test-ocaml-ci-docker/test-ocaml-ci-docker -la
-      #- run: ls -la ~
-      #- run: ls -la /home/user
-      #- run: touch /home/user/asdf
-      #- run: ls /__w/test-ocaml-ci-docker/test-ocaml-ci-docker -la
 
-      #- run: which opam
-      #- run: opam exec -- which ocamlopt
-      #- run: whoami
-      #- run: opam exec -- which dune
-      #- run: opam list
+      - name: Cancel Previous Runs
+        uses: styfle/cancel-workflow-action@0.7.0
+        with:
+          access_token: ${{ github.token }}
 
       - name: Checkout code
         uses: actions/checkout@v3
@@ -77,34 +71,47 @@ jobs:
           opam install odoc --yes
           cd ${{ env.latest }} && opam exec -- dune build @doc --profile=release
 
-      #- run: opam pin OCanren-ppx --dev-repo -n
-      #- run: opam pin OCanren --dev-repo -n
+      - uses: actions/checkout@v2
+        with:
+          repository: Kakadu/zanuda
+          path: zanuda
+      - run: opam pin add ./zanuda --no-action
+      - name: Installing linter
+        run: opam install zanuda --yes --with-doc
 
-      #- run: opam depext OCanren --yes
-      #- run: opam install OCanren-ppx OCanren --yes
+      - uses: reviewdog/action-setup@v1
 
-      #- run: opam pin add . --no-action
+      - run: echo "RDJSON_DIR_PATH=_build/default/_found_lints" >> $GITHUB_ENV
+      - run: cd ${{ env.latest }} && mkdir -p ${{ env.RDJSON_DIR_PATH }}
+      - run: echo "RDJSON_FILE_PATH=${{ env.RDJSON_DIR_PATH }}/lints.rdjsonl" >> $GITHUB_ENV
 
-      #- name: Installing depexts
-      #  run: opam depext noCanren --yes --with-test
+      - name: Running linter in ${{ env.latest }}...
+        run: cd ${{ env.latest }} && opam exec -- zanuda -dir . -add-prefix ${{ env.latest }}/ -ordjsonl ${{ env.RDJSON_FILE_PATH }}
 
-      #- name: Installing dependencies
-      #  run: opam install . --deps-only --with-test
 
-      #- name: Building
-      #  run: opam exec -- dune build --profile=release -p noCanren
+      # github has a limit on annotations. pr-review seems not have this limitation
+        # Error: reviewdog: Too many results (annotations) in diff.
+        # You may miss some annotations due to GitHub limitation for annotation created by logging command.
+        # Please check GitHub Actions log console to see all results.
 
-      #- name: Installing dependencies for testing
-      #  run: opam exec -- dune external-lib-deps -p noCanren-tests . --missing  | cut -f1 | xargs opam install --yes GT
+        # Limitation:
+        # - 10 warning annotations and 10 error annotations per step
+        # - 50 annotations per job (sum of annotations from all the steps)
+        # - 50 annotations per run (separate from the job annotations, these annotations aren't created by users)
 
-      #- name: Testing
-      #  run: opam exec -- dune runtest --profile=release -p noCanren #,noCanren-tests
+      - name: Run reviewdog check (1/5)
+        if: ${{ true }}
+        continue-on-error: true
+        env:
+          REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.REVIEWDOG_TOKEN1 }}
+        run: >
+          cat ${{ env.latest }}/${{ env.RDJSON_FILE_PATH }} |
+          sed -n '1,49p' |
+          reviewdog -f=rdjsonl -filter-mode nofilter -reporter=github-pr-check
 
-      #- name: Installing a package
-      #  run: |
-      #    opam exec -- dune build @install --profile=release
-      #    opam exec -- dune install --profile=release noCanren
-
-      #- name: Listing files
-      #  run: |
-      #    opam show noCanren --list-files
+      - name: Run reviewdog
+        env:
+          REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.REVIEWDOG_TOKEN1 }}
+        run: >
+          cat ${{ env.latest }}/${{ env.RDJSON_FILE_PATH }} |
+          reviewdog -f=rdjsonl -filter-mode nofilter -reporter=github-pr-review
