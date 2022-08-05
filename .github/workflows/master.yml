@@ -4,9 +4,13 @@ on:
   push:
     branches:
       - 'master'
-
+env:
+  OPAMROOT: /home/user/.opam
 jobs:
   build:
+    defaults:
+      run:
+        shell: bash
     strategy:
       fail-fast: false
       matrix:
@@ -19,25 +23,59 @@ jobs:
 
     #container: node:17.6.0
     container:
-      image: kakadu18/ocaml:fp2020
-      options: --user root
+      image: kakadu18/ocaml:fp2022
+      #options: --user user
+      #options: -v /__w/test-ocaml-ci-docker/test-ocaml-ci-docker:/home/user/:rw -w /home/user/
 
     steps:
-      - run: ls /__w/test-ocaml-ci-docker/test-ocaml-ci-docker -la
+      #- run: pwd
+      #- run: id
+      #- run: ls -la
+      #- run: ls /__w/test-ocaml-ci-docker/test-ocaml-ci-docker -la
+      #- run: ls -la ~
+      - run: ls -la /home/user
+      #- run: touch /home/user/asdf
+      #- run: ls /__w/test-ocaml-ci-docker/test-ocaml-ci-docker -la
+
+      #- run: which opam
+      - run: opam exec -- which ocamlopt
+      - run: whoami
+      - run: opam exec -- which dune
+      #- run: opam list
 
       - name: Checkout code
         uses: actions/checkout@v3
         with:
-          path: /__w/test-ocaml-ci-docker/test-ocaml-ci-docker
+          fetch-depth: 0
+        #  path: /__w/test-ocaml-ci-docker/test-ocaml-ci-docker
 
       - run: ls -la
-      #- run: ls /__w/test-ocaml-ci-docker/test-ocaml-ci-docker -la
+      - run: git log
+      - run: git diff --name-only HEAD~0 HEAD~1
+      ############# Detecting and compiling fp2021
+      # Smart link about setting environment variables
+      # https://docs.github.com/en/actions/reference/workflow-commands-for-github-actions#setting-an-environment-variable
+      - run: |
+          bash -x ./detect_latest.sh >> $GITHUB_ENV
+          echo "${{ env.latest }}"
 
-      - run: which ocamlopt
-      - run: which opam
-      - run: which dune
-      - run: opam list
-      - run: dune build --profile=release
+      - name: Installing dependencies
+        run: cd ${{ env.latest }} && opam install . --deps-only --with-test --with-doc --yes
+
+      - name: Checking ocamlformat
+        run: |
+          cd ${{ env.latest }} && opam exec -- dune build @fmt --profile=release
+
+      - name: Compiling ${{ env.latest }}...
+        run: cd ${{ env.latest }} && opam exec -- dune build --profile=release
+
+      - name: Running tests in ${{ env.latest }}...
+        run: cd ${{ env.latest }} && opam exec -- dune runtest --profile=release
+
+      - name: Build API documentation for ${{ env.latest }}...
+        run: |
+          opam install odoc --yes
+          cd ${{ env.latest }} && opam exec -- dune build @doc --profile=release
 
       #- run: opam pin OCanren-ppx --dev-repo -n
       #- run: opam pin OCanren --dev-repo -n
