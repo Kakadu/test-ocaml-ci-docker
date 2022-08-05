@@ -18,16 +18,16 @@ let ao_small_step_strat =
     | Var _ as l -> fin l
     | Abs (x, b) ->
       (match helper b with
-      | WIP b2 -> wip (abs x b2)
-      | Done b2 -> fin (abs x b2))
+       | WIP b2 -> wip (abs x b2)
+       | Done b2 -> fin (abs x b2))
     | App (f, arg) ->
       (match helper f with
-      | WIP f2 -> wip (app f2 arg)
-      | Done (Abs (x, body)) ->
-        (match helper arg with
-        | Done arg -> wip (subst x ~by:arg body)
-        | WIP arg -> wip (app f arg))
-      | Done f2 -> fin (App (f2, arg)))
+       | WIP f2 -> wip (app f2 arg)
+       | Done (Abs (x, body)) ->
+         (match helper arg with
+          | Done arg -> wip (subst x ~by:arg body)
+          | WIP arg -> wip (app f arg))
+       | Done f2 -> fin (App (f2, arg)))
   in
   let rec loop t =
     match helper t with

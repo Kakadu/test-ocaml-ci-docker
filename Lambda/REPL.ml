@@ -14,7 +14,7 @@ let run_single eval =
   | Result.Ok ast ->
     Caml.Format.printf "Parsed result: %a\n%!" Printast.pp_named ast;
     (match eval ast with
-    | rez -> Caml.Format.printf "Evaluated result: %a\n%!" Printast.pp_named rez)
+     | rez -> Caml.Format.printf "Evaluated result: %a\n%!" Printast.pp_named rez)
 ;;
 
 type strategy =
@@ -47,10 +47,10 @@ let () =
   let eval =
     Lambda.apply_strat
       (match opts.stra with
-      | NO -> Lambda.nor_strat
-      | CBV -> Lambda.cbv_strat
-      | AO -> Lambda.ao_strat
-      | CBN -> Lambda.cbn_strat)
+       | NO -> Lambda.nor_strat
+       | CBV -> Lambda.cbv_strat
+       | AO -> Lambda.ao_strat
+       | CBN -> Lambda.cbn_strat)
   in
   (if opts.batch then run_single else run_repl) eval
 ;;

@@ -33,14 +33,14 @@ jobs:
       #- run: ls -la
       #- run: ls /__w/test-ocaml-ci-docker/test-ocaml-ci-docker -la
       #- run: ls -la ~
-      - run: ls -la /home/user
+      #- run: ls -la /home/user
       #- run: touch /home/user/asdf
       #- run: ls /__w/test-ocaml-ci-docker/test-ocaml-ci-docker -la
 
       #- run: which opam
-      - run: opam exec -- which ocamlopt
-      - run: whoami
-      - run: opam exec -- which dune
+      #- run: opam exec -- which ocamlopt
+      #- run: whoami
+      #- run: opam exec -- which dune
       #- run: opam list
 
       - name: Checkout code
@@ -50,8 +50,8 @@ jobs:
         #  path: /__w/test-ocaml-ci-docker/test-ocaml-ci-docker
 
       - run: ls -la
-      - run: git log
-      - run: git diff --name-only HEAD~0 HEAD~1
+      #- run: git log
+      #- run: git diff --name-only HEAD~0 HEAD~1
       ############# Detecting and compiling fp2021
       # Smart link about setting environment variables
       # https://docs.github.com/en/actions/reference/workflow-commands-for-github-actions#setting-an-environment-variable

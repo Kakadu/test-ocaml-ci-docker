@@ -18,9 +18,9 @@ let nor_small_step_strat =
     | (Var _ as l) | (Abs (_, _) as l) -> fin l
     | App (f, arg) ->
       (match helper f with
-      | WIP f2 -> fin (app f2 arg)
-      | Done (Abs (x, e)) -> wip (subst x ~by:arg e)
-      | Done f2 -> fin (App (f2, arg)))
+       | WIP f2 -> fin (app f2 arg)
+       | Done (Abs (x, e)) -> wip (subst x ~by:arg e)
+       | Done f2 -> fin (App (f2, arg)))
   in
   let rec loop t =
     match helper t with
