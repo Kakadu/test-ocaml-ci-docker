@@ -101,11 +101,20 @@ jobs:
 
       - name: Run reviewdog
         if: ${{ true }}
+        continue-on-error: true
         env:
           REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.REVIEWDOG_TOKEN1 }}
         run: >
           cat ${{ env.latest }}/${{ env.RDJSON_FILE_PATH }} |
           reviewdog -f=rdjsonl -filter-mode nofilter -reporter=github-pr-check
+
+      - name: Run reviewdog
+        if: ${{ true }}
+        env:
+          REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.REVIEWDOG_TOKEN1 }}
+        run: >
+          cat ${{ env.latest }}/${{ env.RDJSON_FILE_PATH }} |
+          reviewdog -f=rdjsonl -filter-mode nofilter -reporter=github-pr-review
 
 
       #- run: opam pin OCanren-ppx --dev-repo -n
