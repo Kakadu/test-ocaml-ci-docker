@@ -81,10 +81,10 @@ jobs:
       - uses: actions/checkout@v2
         with:
           repository: Kakadu/mylinter
-          path: mylinter
-      - run: opam pin add ./mylinter --no-action
+          path: zanuda
+      - run: opam pin add ./zanuda --no-action
       - name: Installing linter
-        run: opam install mylinter --yes --with-doc
+        run: opam install zanuda --yes --with-doc
 
       - uses: reviewdog/action-setup@v1
 
@@ -93,11 +93,11 @@ jobs:
       - run: echo "RDJSON_FILE_PATH=${{ env.RDJSON_DIR_PATH }}/lints.rdjsonl" >> $GITHUB_ENV
 
       - name: Running linter in ${{ env.latest }}...
-        run: cd ${{ env.latest }} && opam exec -- mylinter -dir . -add-prefix ${{ env.latest }}/ -ordjsonl ${{ env.RDJSON_FILE_PATH }}
+        run: cd ${{ env.latest }} && opam exec -- zanuda -dir . -add-prefix ${{ env.latest }}/ -ordjsonl ${{ env.RDJSON_FILE_PATH }}
 
 
       - name: Run reviewdog
-        if: ${{ false }}
+        if: ${{ true }}
         #env:
         #  REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.REVIEWDOG_TOKEN1 }}
         run: >
