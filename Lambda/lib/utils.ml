@@ -2,6 +2,7 @@
 
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
+(* *)
 open Base
 open Ast
 
@@ -19,6 +20,7 @@ let free_vars =
 
 let is_free_in x term = List.mem (free_vars term) x ~equal:String.equal
 
+(* *)
 type error =
   | UnknownVariable of string (** just for example *)
   | ParsingErrorDescription
@@ -33,3 +35,4 @@ module type MONAD_FAIL = sig
 
   val fail : 'e -> ('a, 'e) t
 end
+(* *)

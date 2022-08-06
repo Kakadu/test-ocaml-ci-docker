@@ -13,6 +13,7 @@ type 'a status =
 let fin x = Done x
 let wip x = WIP x
 
+(* *)
 let nor_small_step_strat =
   let rec helper = function
     | (Var _ as l) | (Abs (_, _) as l) -> fin l
@@ -42,6 +43,7 @@ let test strat term =
   rez
 ;;
 
+(* *)
 module Std = struct
   let zero = abs "g" @@ abs "y" @@ Var "y"
   let one = abs "f" @@ abs "x" @@ app f (Var "x")

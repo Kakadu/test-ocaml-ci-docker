@@ -13,6 +13,7 @@ type 'a status =
 let fin x = Done x
 let wip x = WIP x
 
+(* *)
 let ao_small_step_strat =
   let rec helper = function
     | Var _ as l -> fin l
@@ -42,6 +43,7 @@ let ao_small_step_strat =
   { on_var; on_abs; on_app }
 ;;
 
+(* *)
 let test strat term =
   Format.printf "Evaluating: %a\n%!" Pprintast.pp term;
   let rez = apply_strat strat term in
@@ -49,6 +51,7 @@ let test strat term =
   rez
 ;;
 
+(* *)
 module _ = struct
   let zero = abs "g" @@ abs "y" @@ Var "y"
   let one = abs "f" @@ abs "x" @@ app f (Var "x")
@@ -88,6 +91,7 @@ module _ = struct
   let () = test ao_strat @@ one |> fun lam -> Format.printf "%a\n%!" Pprintast.pp lam
   let _ = test ao_strat @@ app plus @@ app one one |> Format.printf "%a\n%!" Pprintast.pp
 
+  (* *)
   let () =
     test ao_strat @@ app isZero @@ app one @@ app two three
     |> Format.printf "%a\n%!" Pprintast.pp
@@ -118,3 +122,4 @@ module _ = struct
        Format.printf "%a\n%!" pp_lam lam
      in *)
 end
+(* *)

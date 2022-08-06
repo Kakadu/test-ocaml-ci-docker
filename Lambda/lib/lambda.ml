@@ -22,6 +22,7 @@ let replace_name x ~by =
   helper
 ;;
 
+(* *)
 let rec next_name s old =
   if List.mem ~equal:String.equal old s then next_name ("_" ^ s) old else s
 ;;
@@ -43,6 +44,7 @@ let subst x ~by:v =
   helper
 ;;
 
+(* *)
 type strat =
   { on_var : strat -> name -> string t
   ; on_abs : strat -> name -> string t -> string t
@@ -71,6 +73,7 @@ let cbn_strat =
   { without_strat with on_app }
 ;;
 
+(* *)
 let under_abstraction st x b = abs x (apply_strat st b)
 
 (* Normal Order Reduction to Normal Form
@@ -117,3 +120,4 @@ let zero = abs "f" @@ abs "x" x
 let one = abs "f" @@ abs "x" @@ app f x
 let two = abs "f" @@ abs "x" @@ app f (app f x)
 let three = abs "f" @@ abs "x" @@ app f (app f (app f x))
+(* *)

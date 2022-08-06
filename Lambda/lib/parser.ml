@@ -30,6 +30,7 @@ type dispatch =
 
 type error = [ `ParsingError of string ]
 
+(* *)
 let pp_error ppf = function
   | `ParsingError s -> Format.fprintf ppf "%s" s
 ;;
@@ -77,6 +78,7 @@ let%expect_test _ =
   [%expect {| (App ((Var x), (Var y))) |}]
 ;;
 
+(* *)
 let%expect_test _ =
   Format.printf "%a" pp (parse_optimistically "(\\x . x x)");
   [%expect {| (Abs (x, (App ((Var x), (Var x))))) |}]

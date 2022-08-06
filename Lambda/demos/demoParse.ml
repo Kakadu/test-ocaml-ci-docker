@@ -10,3 +10,4 @@ let () =
   | Result.Ok ast -> Format.printf "%a\n%!" Printast.pp_named ast
   | Error _ -> Format.printf "Some error"
 ;;
+(* *)
