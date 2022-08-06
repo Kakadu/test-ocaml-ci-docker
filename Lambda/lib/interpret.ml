@@ -12,6 +12,7 @@ module Interpret (M : MONAD_FAIL) : sig
 end = struct
   let run _ =
     (* implement interpreter here *)
+    (* Next line is weird looking intentionally (testing a linter) *)
     if true then M.fail (UnknownVariable "var") else failwith "not implemented"
   ;;
 end

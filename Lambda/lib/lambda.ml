@@ -11,6 +11,8 @@ let var x = Var x
 let abs x y = Abs (x, y)
 let app x y = App (x, y)
 
+type named = string Ast.t
+
 let replace_name x ~by =
   let rec helper = function
     | Var y when String.equal x y -> Var by
@@ -22,11 +24,11 @@ let replace_name x ~by =
   helper
 ;;
 
-let rec next_name s old =
-  if List.mem ~equal:String.equal old s then next_name ("_" ^ s) old else s
+let rec next_name s ~old =
+  if List.mem ~equal:String.equal old s then next_name ("_" ^ s) ~old else s
 ;;
 
-(*  The call [subst x ~by:v e] means `[x/v]e` or `e[v -> x]` *)
+(**  The call [subst x ~by:v e] means `[x/v]e` or `e[v -> x]` *)
 let subst x ~by:v =
   let rec helper e =
     match e with
@@ -36,7 +38,7 @@ let subst x ~by:v =
     | Abs (y, b) when String.equal y x -> abs y b
     | Abs (y, t) when is_free_in y v ->
       let frees = free_vars v @ free_vars t in
-      let w = next_name y frees in
+      let w = next_name y ~old:frees in
       helper (abs w (replace_name y ~by:w t))
     | Abs (y, b) -> abs y (helper b)
   in

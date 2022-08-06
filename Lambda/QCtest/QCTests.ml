@@ -5,7 +5,6 @@
 open Format
 open QCheck.Gen
 open Lambda_lib
-open Lambda_lib.Utils
 
 let varname =
   map (fun n -> String.make 1 (Char.chr n)) (int_range (Char.code 'a') (Char.code 'z'))
@@ -16,11 +15,11 @@ let lam_gen =
     sized
     @@ fix (fun self n ->
          match n with
-         | 0 -> map var varname
+         | 0 -> map Lambda.var varname
          | n ->
            frequency
-             [ 1, map2 abs varname (self (n / 2))
-             ; 1, map2 app (self (n / 2)) (self (n / 2))
+             [ 1, map2 Lambda.abs varname (self (n / 2))
+             ; 1, map2 Lambda.app (self (n / 2)) (self (n / 2))
              ]))
 ;;
 
@@ -33,31 +32,33 @@ let __ () =
 let arbitrary_lam =
   let open QCheck.Iter in
   let rec shrink_lam = function
-    | Ast.Var i -> QCheck.Shrink.string i >|= var
-    | Abs (c, b) -> of_list [ b ] <+> (shrink_lam b >|= fun b' -> abs c b')
+    | Ast.Var i -> QCheck.Shrink.string i >|= Lambda.var
+    | Abs (c, b) -> of_list [ b ] <+> (shrink_lam b >|= fun b' -> Lambda.abs c b')
     | App (a, b) ->
       of_list [ a; b ]
-      <+> (shrink_lam a >|= fun a' -> app a' b)
-      <+> (shrink_lam b >|= fun b' -> app a b')
+      <+> (shrink_lam a >|= fun a' -> Lambda.app a' b)
+      <+> (shrink_lam b >|= fun b' -> Lambda.app a b')
   in
   QCheck.make lam_gen ~print:(asprintf "%a" Printast.pp_named) ~shrink:shrink_lam
 ;;
 
 let rec pp ppf = function
-  | Ast.Var c ->
-    Format.fprintf ppf "%s" c (* | App (l, r) -> Format.fprintf ppf "(%a %a)" pp l pp r *)
-  | App (l, r) -> Format.fprintf ppf "%a %a" pp l pp r (* Buggy implementation *)
+  (* OK implementation *)
+  | Ast.App (l, r) -> Format.fprintf ppf "(%a %a)" pp l pp r
+  (* Buggy implementation *)
+  (* | Ast.App (l, r) -> Format.fprintf ppf "%a %a" pp l pp r *)
   | Abs (x, b) -> Format.fprintf ppf "(\\%s . %a)" x pp b
+  | Var c -> Format.fprintf ppf "%s" c
 ;;
 
-let print_parse_is_identity =
-  QCheck.(
-    Test.make arbitrary_lam (fun l ->
-      Caml.Result.ok l
-      = Angstrom.parse_string
-          ~consume:Angstrom.Consume.Prefix
-          Parser.(parse_lam.single parse_lam)
-          (Format.asprintf "%a" pp l)))
+let parse_after_print_is_identity =
+  let open QCheck in
+  Test.make arbitrary_lam (fun l ->
+    Caml.Result.ok l
+    = Angstrom.parse_string
+        ~consume:Angstrom.Consume.Prefix
+        Parser.(parse_lam.single parse_lam)
+        (Format.asprintf "%a" pp l))
 ;;
 
-let run () = QCheck_base_runner.run_tests [ print_parse_is_identity ]
+let run () = QCheck_base_runner.run_tests [ parse_after_print_is_identity ]

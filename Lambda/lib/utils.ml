@@ -23,10 +23,6 @@ type error =
   | UnknownVariable of string (** just for example *)
   | ParsingErrorDescription
 
-let var x = Var x
-let abs x l = Abs (x, l)
-let app l r = App (l, r)
-
 (* TODO: rework this *)
 module type MONAD_FAIL = sig
   include Base.Monad.S2
