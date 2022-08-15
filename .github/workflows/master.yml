@@ -25,27 +25,17 @@ jobs:
 
     runs-on: ${{ matrix.os }}
 
-    #container: node:17.6.0
     container:
       image: kakadu18/ocaml:fp2022
       #options: --user user
       #options: -v /__w/test-ocaml-ci-docker/test-ocaml-ci-docker:/home/user/:rw -w /home/user/
 
     steps:
-      #- run: pwd
-      #- run: id
-      #- run: ls -la
-      #- run: ls /__w/test-ocaml-ci-docker/test-ocaml-ci-docker -la
-      #- run: ls -la ~
-      #- run: ls -la /home/user
-      #- run: touch /home/user/asdf
-      #- run: ls /__w/test-ocaml-ci-docker/test-ocaml-ci-docker -la
 
-      #- run: which opam
-      #- run: opam exec -- which ocamlopt
-      #- run: whoami
-      #- run: opam exec -- which dune
-      #- run: opam list
+      - name: Cancel Previous Runs
+        uses: styfle/cancel-workflow-action@0.7.0
+        with:
+          access_token: ${{ github.token }}
 
       - name: Checkout code
         uses: actions/checkout@v3
@@ -83,7 +73,7 @@ jobs:
 
       - uses: actions/checkout@v2
         with:
-          repository: Kakadu/mylinter
+          repository: Kakadu/zanuda
           path: zanuda
       - run: opam pin add ./zanuda --no-action
       - name: Installing linter
@@ -125,36 +115,3 @@ jobs:
         run: >
           cat ${{ env.latest }}/${{ env.RDJSON_FILE_PATH }} |
           reviewdog -f=rdjsonl -filter-mode nofilter -reporter=github-pr-review
-
-
-      #- run: opam pin OCanren-ppx --dev-repo -n
-      #- run: opam pin OCanren --dev-repo -n
-
-      #- run: opam depext OCanren --yes
-      #- run: opam install OCanren-ppx OCanren --yes
-
-      #- run: opam pin add . --no-action
-
-      #- name: Installing depexts
-      #  run: opam depext noCanren --yes --with-test
-
-      #- name: Installing dependencies
-      #  run: opam install . --deps-only --with-test
-
-      #- name: Building
-      #  run: opam exec -- dune build --profile=release -p noCanren
-
-      #- name: Installing dependencies for testing
-      #  run: opam exec -- dune external-lib-deps -p noCanren-tests . --missing  | cut -f1 | xargs opam install --yes GT
-
-      #- name: Testing
-      #  run: opam exec -- dune runtest --profile=release -p noCanren #,noCanren-tests
-
-      #- name: Installing a package
-      #  run: |
-      #    opam exec -- dune build @install --profile=release
-      #    opam exec -- dune install --profile=release noCanren
-
-      #- name: Listing files
-      #  run: |
-      #    opam show noCanren --list-files
