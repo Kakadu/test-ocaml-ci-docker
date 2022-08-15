@@ -1,4 +1,6 @@
-.PHONY: repl tests test fmt lint celan
+.PHONY: repl tests test fmt lint deps celan
+
+.DEFAULT: all
 
 all:
 	dune build
@@ -24,3 +26,5 @@ release:
 	dune build --profile=release
 	dune runtest --profile=release
 
+deps:
+	# opam install qcheck-core
