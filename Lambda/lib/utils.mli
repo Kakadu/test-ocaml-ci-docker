@@ -10,12 +10,6 @@ type error =
   | UnknownVariable of string
   | ParsingErrorDescription
 
-(** Smart constructors for Abstract Syntax Tree *)
-
-val var : 'a -> 'a Ast.t
-val abs : 'a -> 'a Ast.t -> 'a Ast.t
-val app : 'a Ast.t -> 'a Ast.t -> 'a Ast.t
-
 module type MONAD_FAIL = sig
   type ('a, 'e) t
 
