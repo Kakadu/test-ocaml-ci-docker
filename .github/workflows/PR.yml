@@ -62,8 +62,8 @@ jobs:
 
       - name: Installing dependencies
         run: cd ${{ env.latest }} && opam install . --deps-only --with-test --with-doc
-      - name: Installing linter
-        run: opam install mylinter --yes --with-doc
+      #- name: Installing linter
+      #  run: opam install mylinter --yes --with-doc
 
       - name: Naive linting
         run: |
