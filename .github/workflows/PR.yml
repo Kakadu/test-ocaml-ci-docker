@@ -43,11 +43,11 @@ jobs:
           fetch-depth: 0                # fix me later
 
       ########## Installing a linter
-      - uses: actions/checkout@v2
-        with:
-          repository: Kakadu/zanuda
-          path: zanuda
-      - run: opam pin add ./zanuda --no-action
+      # - uses: actions/checkout@v2
+      #   with:
+      #     repository: Kakadu/mylinter
+      #     path: zanuda
+      - run: opam pin add https://github.com/Kakadu/mylinter --no-action
       - name: Installing a linter
         run: opam install zanuda --yes
 
