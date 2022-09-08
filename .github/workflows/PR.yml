@@ -91,7 +91,7 @@ jobs:
       - run: echo "RDJSON_FILE_PATH=${{ env.RDJSON_DIR_PATH }}/lints.rdjsonl" >> $GITHUB_ENV
 
       - name: Running linter in ${{ env.latest }}...
-        run: cd ${{ env.latest }} && opam exec -- mylinter -dir . -add-prefix ${{ env.latest }}/ -ordjsonl ${{ env.RDJSON_FILE_PATH }}
+        run: cd ${{ env.latest }} && opam exec -- zanuda -dir . -add-prefix ${{ env.latest }}/ -ordjsonl ${{ env.RDJSON_FILE_PATH }}
 
       - run: cat ${{ env.latest }}/${{ env.RDJSON_FILE_PATH }}
       - run: echo ${{ env.latest }} > ${{ env.latest }}/${{ env.RDJSON_DIR_PATH }}/projectname.txt
