@@ -130,7 +130,7 @@ jobs:
             ${{ env.latest }}/${{ env.RDJSON_DIR_PATH }}/CI_COMMIT.txt
 
       - name: Installing a clone detector
-        run: npm install -g jscpd
+        run: npm install jscpd
 
       - name: Looking for clones
         run: python3 -m trace --trace ./find_clones.py ${{ env.latest }}
