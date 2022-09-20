@@ -304,7 +304,8 @@ jobs:
         id: template
         uses: chuhlomin/render-template@v1.4
         with:
-          template: .github/jscpd.template.md
+          #template: .github/jscpd.template.md
+          template: jscpd.template.md
           vars: |
             contents: ${{ steps.read-escaped-markdown.outputs.contents }}
 

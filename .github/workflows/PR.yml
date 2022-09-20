@@ -128,3 +128,4 @@ jobs:
           path: |
             jscpd_report.txt
             PR_number.txt
+            .github/jscpd.template.md
