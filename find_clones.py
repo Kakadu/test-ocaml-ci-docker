@@ -24,6 +24,4 @@ if 1:
   cmd = f"jscpd --pattern '{LANG}/**/*.ml*' -b -r consoleFull > _reports/vs_{LANG}.txt"
   os.system(cmd)
 
-os.system(f"echo '#### Результат поиска клонов\n```\n' > {REPORT_FILE}")
-os.system(f"cat {REPORTS_DIR}/*.txt >> {REPORT_FILE}")
-os.system(f"echo '\n```\n' >> {REPORT_FILE}")
+os.system(f"cat {REPORTS_DIR}/*.txt > {REPORT_FILE}")

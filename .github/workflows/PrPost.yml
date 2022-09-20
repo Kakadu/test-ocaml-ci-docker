@@ -82,17 +82,8 @@ jobs:
           keep_files: true
           destination_dir: 2022/${{ env.PIARAST_NAME }}/
 
-
-      # - name: Prepare text with found lints (1/2)
-      #   shell: bash
-      #   run: |
-      #     cat > text.md <<-EOF
-      #         Linter report from $(TZ='Europe/Moscow' date), for mini language ${{ env.LANG_NAME }}
-      #     EOF
       - name: Prepare text with found lints
         shell: bash
-        #env:
-        #  TZ: Europe/Moscow
         run: |
           export TZ='Europe/Moscow'
           echo "Linter report from $(date), for mini language ${{ env.LANG_NAME }}" > text.md
@@ -124,15 +115,29 @@ jobs:
           body-includes: Linter report from
           comment-author: github-actions[bot]
 
-      - name: Create or replace a comment comment
-        uses: peter-evans/create-or-update-comment@v1
-        if: ${{ always() }}
+      - name: Delete old comment
+        uses: jungwinter/comment@v1
+        if: ${{ steps.fc.outputs.comment-id != 0 }}
         with:
-          comment-id: ${{ steps.fc.outputs.comment-id }}
+          type: delete
+          comment_id: ${{ steps.fc.outputs.comment-id }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      # - name: Create or replace a comment comment
+      #   uses: peter-evans/create-or-update-comment@v1
+      #   if: ${{ always() }}
+      #   with:
+      #     comment-id: ${{ steps.fc.outputs.comment-id }}
+      #     edit-mode: replace
+      #     issue-number: ${{ env.CI_PULL_REQUEST }}
+      #     body: ${{ steps.read-escaped-markdown.outputs.contents }}
+
+      - name: Create comment
+        uses: peter-evans/create-or-update-comment@v1
+        with:
           edit-mode: replace
           issue-number: ${{ env.CI_PULL_REQUEST }}
           body: ${{ steps.read-escaped-markdown.outputs.contents }}
-
 
   ###################################################################################################
   upload_docs:
@@ -231,7 +236,7 @@ jobs:
         uses: actions/github-script@v3.1.0
         with:
           script: |
-            console.log(${{ github.event.workflow_run.id }});
+            //console.log(${{ github.event.workflow_run.id }});
             var artifacts = await github.actions.listWorkflowRunArtifacts({
                owner: context.repo.owner,
                repo: context.repo.repo,
@@ -253,14 +258,27 @@ jobs:
       - run: |
           echo "PR_NUMBER=$(cat PR_number.txt)" >> $GITHUB_ENV
 
-      #- run: cat jscpd_report.txt
-      - id: get-comment-body
+      - name: Prepare text with clones report
+        shell: bash
         run: |
-          body="$(cat jscpd_report.txt)"
-          body="${body//'%'/'%25'}"
-          body="${body//$'\n'/'%0A'}"
-          body="${body//$'\r'/'%0D'}"
-          echo "::set-output name=body::$body"
+          echo "A report of looking for clones for mini language ${{ env.LANG_NAME }}" > text.md
+          echo '```' >> text.md
+          cat jscpd_report.txt >> text.md
+          echo '```' >> text.md
+
+      - name: Read file contents
+        id: read-escaped-markdown
+        uses: andstor/file-reader-action@v1
+        with:
+          path: text.md
+
+      # - id: get-comment-body
+      #   run: |
+      #     body="$(cat jscpd_report.txt)"
+      #     body="${body//'%'/'%25'}"
+      #     body="${body//$'\n'/'%0A'}"
+      #     body="${body//$'\r'/'%0D'}"
+      #     echo "::set-output name=body::$body"
 
       #- run: echo '${{ steps.get-comment-body.outputs.body }}'
       - name: Find Comment
@@ -285,4 +303,4 @@ jobs:
         with:
           edit-mode: replace
           issue-number: ${{ env.PR_NUMBER }}
-          body: ${{ steps.get-comment-body.outputs.body }}
+          body: ${{ steps.read-escaped-markdown.outputs.contents }}
