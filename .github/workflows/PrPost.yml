@@ -123,15 +123,6 @@ jobs:
           comment_id: ${{ steps.fc.outputs.comment-id }}
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      # - name: Create or replace a comment comment
-      #   uses: peter-evans/create-or-update-comment@v1
-      #   if: ${{ always() }}
-      #   with:
-      #     comment-id: ${{ steps.fc.outputs.comment-id }}
-      #     edit-mode: replace
-      #     issue-number: ${{ env.CI_PULL_REQUEST }}
-      #     body: ${{ steps.read-escaped-markdown.outputs.contents }}
-
       - name: Create comment
         uses: peter-evans/create-or-update-comment@v1
         with:
@@ -263,10 +254,6 @@ jobs:
         run: |
           printf "%s" "$(< jscpd_report.txt)" > text.md
           # https://stackoverflow.com/a/12524345
-          #cat jscpd_report.txt >> text.md
-          #echo "A report of looking for clones for mini language ${{ env.LANG_NAME }}" > text.md
-          #echo '```' >> text.md
-          #echo '```' >> text.md
 
       - name: Read file contents
         id: read-escaped-markdown
@@ -274,15 +261,6 @@ jobs:
         with:
           path: text.md
 
-      # - id: get-comment-body
-      #   run: |
-      #     body="$(cat jscpd_report.txt)"
-      #     body="${body//'%'/'%25'}"
-      #     body="${body//$'\n'/'%0A'}"
-      #     body="${body//$'\r'/'%0D'}"
-      #     echo "::set-output name=body::$body"
-
-      #- run: echo '${{ steps.get-comment-body.outputs.body }}'
       - name: Find Comment
         uses: peter-evans/find-comment@v1
         id: fc
@@ -304,8 +282,7 @@ jobs:
         id: template
         uses: chuhlomin/render-template@v1.4
         with:
-          #template: .github/jscpd.template.md
-          template: jscpd.template.md
+          template: .github/jscpd.template.md
           vars: |
             contents: ${{ steps.read-escaped-markdown.outputs.contents }}
 
