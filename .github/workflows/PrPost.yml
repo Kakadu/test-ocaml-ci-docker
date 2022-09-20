@@ -102,24 +102,14 @@ jobs:
 
       - run: cat text.md
 
-      - id: get-comment-body
-        run: |
-          #cat text.md | sed -e 's/%/%25/' | perl -pe 's/\n/%0A/g'
-          #body=$(cat text.md)
-          #echo $body
-          #body="${body//'%'/'%25'}"
-          #echo $body
-          #body="${body//$'\n'/'%0A'}"
-          #echo $body
-          #body="${body//$'\r'/'%0D'}"
-          #echo $body
-          cat text.md | sed -e 's/%/%25/' | perl -pe 's/\n/%0A/g' > text.escaped.md
+      - name: Escaping markdown
+        run: cat text.md | sed -e 's/%/%25/' | perl -pe 's/\n/%0A/g' > text.escaped.md
 
       - name: Read file contents
         id: read-escaped-markdown
         uses: andstor/file-reader-action@v1
         with:
-          path: "text.escaped.md"
+          path: text.md
 
       - name: contents of escaped file
         run: cat text.escaped.md
@@ -143,22 +133,7 @@ jobs:
           issue-number: ${{ env.CI_PULL_REQUEST }}
           body: ${{ steps.read-escaped-markdown.outputs.contents }}
 
-      # - name: comment PR (using another action)
-      #   uses: machine-learning-apps/pr-comment@master
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #   with:
-      #     path: text.md
-      #uses: NejcZdovc/comment-pr@v1
-      #with:
-      #  file: "text.md"
-      #env:
-      #  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # - uses: actions-ecosystem/action-create-comment@v1
-      #   with:
-      #     github_token: ${{ secrets.github_token }}
-      #     body: ${{ steps.get-comment-body.outputs.body }}
   ###################################################################################################
   upload_docs:
     runs-on: ubuntu-latest
