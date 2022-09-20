@@ -310,11 +310,11 @@ jobs:
 
       - name: Create comment
         uses: peter-evans/create-or-update-comment@v1
-        if: ${{ steps.read-escaped-markdown.outputs.contents != "" }}
+        if: ${{ steps.read-escaped-markdown.outputs.contents != '' }}
         with:
           edit-mode: replace
           issue-number: ${{ env.PR_NUMBER }}
           body: ${{ steps.read-escaped-markdown.outputs.contents }}
 
-      - if: ${{ steps.read-escaped-markdown.outputs.contents == "" }}
+      - if: ${{ steps.read-escaped-markdown.outputs.contents == '' }}
         run: echo "JSPD report is empty"
