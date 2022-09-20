@@ -261,10 +261,12 @@ jobs:
       - name: Prepare text with clones report
         shell: bash
         run: |
-          echo "A report of looking for clones for mini language ${{ env.LANG_NAME }}" > text.md
-          echo '```' >> text.md
-          cat jscpd_report.txt >> text.md
-          echo '```' >> text.md
+          printf "%s" "$(< jscpd_report.txt)" > text.md
+          # https://stackoverflow.com/a/12524345
+          #cat jscpd_report.txt >> text.md
+          #echo "A report of looking for clones for mini language ${{ env.LANG_NAME }}" > text.md
+          #echo '```' >> text.md
+          #echo '```' >> text.md
 
       - name: Read file contents
         id: read-escaped-markdown
@@ -287,7 +289,7 @@ jobs:
         if: ${{ always() }}
         with:
           issue-number: ${{ env.PR_NUMBER }}
-          body-includes: Результат поиска клонов
+          body-includes: A report of looking for clones
           comment-author: github-actions[bot]
 
       - name: Delete old comment
@@ -298,9 +300,21 @@ jobs:
           comment_id: ${{ steps.fc.outputs.comment-id }}
           token: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Render template
+        id: template
+        uses: chuhlomin/render-template@v1.4
+        with:
+          template: .github/jscpd.template.md
+          vars: |
+            contents: ${{ steps.read-escaped-markdown.outputs.contents }}
+
       - name: Create comment
         uses: peter-evans/create-or-update-comment@v1
+        if: ${{ steps.read-escaped-markdown.outputs.contents != "" }}
         with:
           edit-mode: replace
           issue-number: ${{ env.PR_NUMBER }}
           body: ${{ steps.read-escaped-markdown.outputs.contents }}
+
+      - if: ${{ steps.read-escaped-markdown.outputs.contents == "" }}
+        run: echo "JSPD report is empty"
